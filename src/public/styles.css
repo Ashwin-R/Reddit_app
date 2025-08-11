@@ -1,0 +1,102 @@
+/* /public/styles.css */
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+}
+
+.container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+h1, h2, h3 {
+    color: #ff4500;
+    margin-bottom: 10px;
+}
+
+.metrics p,
+.metrics ul {
+    margin: 10px 0;
+}
+
+ul {
+    padding-left: 20px;
+}
+
+img {
+    border-radius: 50%;
+}
+
+.login-button {
+    display: inline-block;
+    background-color: #ff4500;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    padding: 12px 24px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.login-button:hover {
+    background-color: #e03d00;
+}
+
+li img {
+    margin-right: 8px;
+    vertical-align: middle;
+    border-radius: 6px;
+}
+
+.vote-arrow {
+  width: 12px;
+  height: 12px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 4px;
+  fill: #878a8c; /* gray color */
+  cursor: default;
+}
+
+.vote-arrow.up {
+  /* Up arrow shape */
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  background-color: #878a8c;
+  width: 0; 
+  height: 0; 
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 10px solid #878a8c;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.vote-arrow.down {
+  /* Down arrow shape */
+  clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+  background-color: #878a8c;
+  width: 0; 
+  height: 0; 
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 10px solid #878a8c;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+/* Optional: color on hover or based on vote */
+.vote-arrow.up.active {
+  border-bottom-color: #ff4500; /* reddit orange */
+}
+
+.vote-arrow.down.active {
+  border-top-color: #7193ff; /* reddit blue */
+}
+

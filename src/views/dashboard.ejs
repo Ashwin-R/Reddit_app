@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Dashboard</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <style>
+    .tabs {
+      margin-bottom: 20px;
+    }
+
+    .tab-button {
+      padding: 10px 20px;
+      border: none;
+      background-color: #ddd;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+
+    .tab-button.active {
+      background-color: #bbb;
+      font-weight: bold;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .scrollable {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+
+    .votes-container {
+      display: flex;
+      gap: 20px;
+    }
+
+    .vote-column {
+      flex: 1;
+    }
+
+    /* Reddit-style vote arrows */
+
+    .vote-arrow.up {
+      width: 0; 
+      height: 0; 
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-bottom: 10px solid #ff4500; /* gray */
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 6px;
+      cursor: default;
+    }
+
+    .vote-arrow.down {
+      width: 0; 
+      height: 0; 
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 10px solid #7193ff; /* gray */
+      display: inline-block;
+      vertical-align: middle;
+      margin-right: 6px;
+      cursor: default;
+    }
+
+    /* Optional active color (like Reddit) */
+    .vote-arrow.up.active {
+      border-bottom-color: #ff4500; /* reddit orange */
+    }
+
+    .vote-arrow.down.active {
+      border-top-color: #7193ff; /* reddit blue */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Welcome to Your Dashboard</h1>
+
+    <% if (userMetrics.info.snoovatar_img) { %>
+      <img src="<%= userMetrics.info.snoovatar_img %>" alt="Avatar" style="width:100px; margin-bottom: 15px;">
+    <% } %>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-button active" onclick="showTab('overview')">Overview</button>
+      <button class="tab-button" onclick="showTab('posts')">Posts</button>
+      <button class="tab-button" onclick="showTab('comments')">Comments</button>
+      <button class="tab-button" onclick="showTab('votes')">Votes</button>
+      <button class="tab-button" onclick="showTab('subreddits')">Subreddits</button>
+    </div>
+
+    <!-- Overview Tab -->
+    <div id="overview" class="tab-content active">
+      <h2>User Metrics</h2>
+      <div class="metrics">
+        <p><strong>Username:</strong> <%= userMetrics.info.name %></p>
+        <p><strong>Link Karma:</strong> <%= userMetrics.info.link_karma %></p>
+        <p><strong>Comment Karma:</strong> <%= userMetrics.info.comment_karma %></p>
+
+        <h3>Summary:</h3>
+        <ul>
+          <li><strong>Total Posts:</strong> <%= userMetrics.posts.length %></li>
+          <li><strong>Total Comments:</strong> <%= userMetrics.comments.length %></li>
+          <li><strong>Upvoted Posts:</strong> <%= userMetrics.upvotedPosts.length %></li>
+          <li><strong>Downvoted Posts:</strong> <%= userMetrics.downvotedPosts.length %></li>
+          <li><strong>Subscribed Subreddits:</strong> <%= userMetrics.subscriptions.length %></li>
+        </ul>
+
+        <h3>Karma Breakdown by Subreddit:</h3>
+        <% if (userMetrics.karmaBreakdown && userMetrics.karmaBreakdown.length > 0) { %>
+          <ul>
+            <% userMetrics.karmaBreakdown.forEach(function(item) { %>
+              <li>r/<%= item.sr %>: 🗨️ <%= item.comment_karma %>, 🔗 <%= item.link_karma %></li>
+            <% }); %>
+          </ul>
+        <% } else { %>
+          <p>No karma breakdown data available.</p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Posts Tab -->
+    <div id="posts" class="tab-content">
+      <h2>Your Posts</h2>
+      <% if (userMetrics.posts.length === 0) { %>
+        <p>You haven't submitted any posts yet.</p>
+      <% } else { %>
+        <ul>
+          <% userMetrics.posts.forEach(function(post) { %>
+            <li style="margin-bottom: 20px;">
+              <a href="<%= post.url %>" target="_blank"><%= post.title %></a>
+              <br />
+              <small>
+                Posted in r/<strong><%= post.subreddit %></strong>
+                <% if (post.link_flair_text) { %> | Flair: <em><%= post.link_flair_text %></em><% } %>
+                | Posted on <%= new Date(post.created_utc * 1000).toLocaleString() %>
+              </small>
+              <% if (post.selftext && post.selftext.trim() !== '') { %>
+                <p style="margin-top: 8px; white-space: pre-wrap;"><%= post.selftext %></p>
+              <% } %>
+              <span>
+                <span class="vote-arrow up"></span> <%= post.ups %>, 
+                <span class="vote-arrow down"></span> <%= post.downs %>
+              </span>
+            </li>
+          <% }); %>
+        </ul>
+      <% } %>
+    </div>
+
+    <!-- Comments Tab -->
+    <div id="comments" class="tab-content">
+      <h2>Your Comments</h2>
+      <% if (userMetrics.comments.length === 0) { %>
+        <p>You haven't written any comments yet.</p>
+      <% } else { %>
+        <ul>
+          <% userMetrics.comments.forEach(function(comment) { %>
+            <li style="margin-bottom: 15px;">
+              <div><strong>In r/<%= comment.subreddit %>:</strong></div>
+              <div><%= comment.body %> — <span class="vote-arrow up"></span> <%= comment.ups %></div>
+              
+              <% if (comment.parent) { %>
+                <div style="margin-left: 15px; margin-top: 5px; padding-left: 10px; border-left: 2px solid #ccc; font-style: italic; font-size: 0.9em; color: #555;">
+                  Replying to 
+                  <% if (comment.parent.type === 'post') { %>
+                    post: <a href="https://reddit.com<%= comment.parent.permalink %>" target="_blank"><%= comment.parent.title %></a>
+                  <% } else if (comment.parent.type === 'comment') { %>
+                    comment: "<%= comment.parent.body.length > 100 ? comment.parent.body.substring(0, 100) + '...' : comment.parent.body %>"
+                  <% } %>
+                </div>
+              <% } %>
+            </li>
+          <% }); %>
+        </ul>
+      <% } %>
+    </div>
+
+    <!-- Votes Tab -->
+    <div id="votes" class="tab-content">
+      <h2>Votes (Upvoted & Downvoted)</h2>
+      <div class="votes-container">
+        <!-- Upvoted Posts -->
+        <div class="vote-column">
+          <h3>Upvoted Posts</h3>
+          <% if (userMetrics.upvotedPosts.length === 0) { %>
+            <p>No upvoted posts.</p>
+          <% } else { %>
+            <div class="scrollable">
+              <ul>
+                <% userMetrics.upvotedPosts.forEach(function(post) { %>
+                  <li>
+                    <a href="https://reddit.com<%= post.permalink %>" target="_blank"><%= post.title %></a>
+                    — r/<%= post.subreddit %>, <span class="vote-arrow up"></span> <%= post.ups %>
+                  </li>
+                <% }); %>
+              </ul>
+            </div>
+          <% } %>
+        </div>
+
+        <!-- Downvoted Posts -->
+        <div class="vote-column">
+          <h3>Downvoted Posts</h3>
+          <% if (userMetrics.downvotedPosts.length === 0) { %>
+            <p>No downvoted posts.</p>
+          <% } else { %>
+            <div class="scrollable">
+              <ul>
+                <% userMetrics.downvotedPosts.forEach(function(post) { %>
+                  <li>
+                    <a href="https://reddit.com<%= post.permalink %>" target="_blank"><%= post.title %></a>
+                    — r/<%= post.subreddit %>, <span class="vote-arrow down"></span> <%= post.ups %>
+                  </li>
+                <% }); %>
+              </ul>
+            </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <!-- Subreddits Tab -->
+    <div id="subreddits" class="tab-content">
+      <h2>Your Subscribed Subreddits</h2>
+      <% if (userMetrics.subscriptions.length === 0) { %>
+        <p>You are not subscribed to any subreddits.</p>
+      <% } else { %>
+        <div class="scrollable">
+          <ul>
+            <% userMetrics.subscriptions.forEach(function(sub) { %>
+              <li>
+                <% if (sub.icon) { %>
+                  <img src="<%= sub.icon %>" alt="icon" style="width: 20px; height: 20px; vertical-align: middle; margin-right: 5px;">
+                <% } %>
+                <strong>r/<%= sub.name %></strong> — <%= sub.subscribers %> subscribers<br />
+                <em><%= sub.description || "No description available." %></em>
+              </li>
+            <% }); %>
+          </ul>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <script>
+    function showTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+      });
+      document.getElementById(tabId).classList.add('active');
+      document.querySelectorAll('.tab-button').forEach(btn => {
+        if (btn.textContent.toLowerCase() === tabId) {
+          btn.classList.add('active');
+        }
+      });
+    }
+  </script>
+</body>
+</html>
