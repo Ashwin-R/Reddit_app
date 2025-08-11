@@ -3,7 +3,7 @@
 1. **Clone the repository:**
    ```
    git clone <repository-url>
-   cd reddit-auth-webapp
+   cd reddit_app
    ```
 
 2. **Install dependencies:**
